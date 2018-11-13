@@ -3,16 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package DAO;
+package MVC;
 
-import javax.activation.DataSource;
+import javax.sql.DataSource;
 
 /**
  *
- * @author pedago
+ * @author François
  */
 public class DataSourceFactory {
-    public static DataSource getDataSource() {
+    
+    	public static DataSource getDataSource() {
 		org.apache.derby.jdbc.ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
 		ds.setDatabaseName("sample");
 		ds.setUser("app");
@@ -23,4 +24,5 @@ public class DataSourceFactory {
 		ds.setPortNumber(1527);
 		return ds;
 	}	
+    
 }

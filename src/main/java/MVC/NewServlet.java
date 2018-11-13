@@ -3,10 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package controllers;
+package MVC;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,10 +17,11 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author pedago
+ * @author François
  */
-@WebServlet(name = "Controller", urlPatterns = {"/Controller"})
-public class DiscountCodeController extends HttpServlet {
+
+@WebServlet(name = "NewServlet", urlPatterns = {"/NewServlet"})
+public class NewServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -30,22 +33,37 @@ public class DiscountCodeController extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+            throws ServletException, IOException, Exception {
         
+        String code = request.getParameter("code");
+        String taux = request.getParameter("taux");
+        String action = request.getParameter("action");
+        String error = "";
         
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet Controller</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet Controller at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
+        DAO dao = new DAO(DataSourceFactory.getDataSource());
+        
+        if ("ADD".equals(action)) {
+            try{
+                dao.addDiscountCode(code, Float.parseFloat(taux));
+            }
+            catch (Exception s){
+                dao.updateDiscountCode(code, Float.parseFloat(taux));
+            }
+        } 
+        if ("DELETE".equals(action)) {
+            try {
+                dao.deleteDiscountCode(code);
+            }
+            catch (Exception s){
+               error = "Impossible to delete " + code + ", already used.";
+            }
+        } 
+        
+        List<DiscountEntity> Discount = dao.DiscountList();
+        request.setAttribute("Discounts", Discount);
+        request.setAttribute("Error",error);
+        request.getRequestDispatcher("View.jsp").forward(request, response);
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -58,9 +76,14 @@ public class DiscountCodeController extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (Exception ex) {
+            Logger.getLogger(NewServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -74,7 +97,11 @@ public class DiscountCodeController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (Exception ex) {
+            Logger.getLogger(NewServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
